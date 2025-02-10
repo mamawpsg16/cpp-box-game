@@ -1,0 +1,41 @@
+ 
+# Compiled binary files
+*.exe
+*.out
+*.app
+
+# Object files
+*.o
+*.obj
+*.lo
+*.d
+
+# Debugging and log files
+*.log
+*.bak
+*.tmp
+*.swp
+
+# Build directories
+build/
+intermediate/
+
+# Visual Studio files
+*.vcxproj*
+*.ncb
+*.sdf
+*.opensdf
+*.user
+
+# VS Code settings
+.vscode/
+.vs/
+
+# Temporary files
+*.DS_Store
+Thumbs.db
+
+# Ensure resources folder is tracked by Git
+!resources/
+!dependencies/
+!resources/
