@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <sstream>
 #include <iostream>
 /* CONSTRUCTOR */
 Game::Game()
@@ -7,7 +8,6 @@ Game::Game()
 	this->initializeWindow();
     this->initializeFonts();
     this->initializeTexts();
-    this->initializeEnemies();
 
 }
 
@@ -30,11 +30,6 @@ void Game::initializeWindow()
     this->window->setFramerateLimit(60);
 }
 
-void Game::initializeEnemies()
-{
-    this->enemy.setSize(sf::Vector2f(100.0f, 100.0f));
-    this->enemy.setFillColor(sf::Color::Cyan);
-}
 
 void Game::initializeFonts()
 {
@@ -113,134 +108,101 @@ void Game::update()
 
 void Game::spawnEnemy()
 {
-    /*
-        @return void
+    float x = static_cast<float>(rand() % static_cast<int>(this->window->getSize().x - 100));
+    float y = 0.0f;
 
-        Spawn enemies and  sets their types, colors and spawn them position randomly
-        - sets a random position.
-        - sets a random color.
-        - adds enemy to the vector.
-    */
-
-    this->enemy.setPosition(
-        sf::Vector2f(
-            static_cast<float>(rand() % static_cast<int>(this->window->getSize().x - this->enemy.getSize().x)),
-            0.0f
-        )
-    );
-
-    //Randomize enemy type;
     int type = rand() % 5;
+    float size = 0.0f;
+    sf::Color color;
+    float speed = 2.0f;
 
     switch (type)
     {
     case 0:
-        this->enemy.setSize(sf::Vector2f(15.0f, 15.0f));
-        this->enemy.setFillColor(sf::Color::Magenta);
+        size = 15.0f;
+        color = sf::Color::Magenta;
+        speed = 3.0f;
         break;
     case 1:
-        this->enemy.setSize(sf::Vector2f(30.0f, 30.0f));
-        this->enemy.setFillColor(sf::Color::Blue);
+        size = 30.0f;
+        color = sf::Color::Blue;
+        speed = 2.8f;
         break;
     case 2:
-        this->enemy.setSize(sf::Vector2f(50.0f, 50.0f));
-        this->enemy.setFillColor(sf::Color::Cyan);
+        size = 50.0f;
+        color = sf::Color::Cyan;
+        speed = 2.5f;
         break;
     case 3:
-        this->enemy.setSize(sf::Vector2f(70.0f, 70.0f));
-        this->enemy.setFillColor(sf::Color::Red);
+        size = 70.0f;
+        color = sf::Color::Red;
+        speed = 2.2f;
         break;
     case 4:
-        this->enemy.setSize(sf::Vector2f(90.0f, 90.0f));
-        this->enemy.setFillColor(sf::Color::Green);
+        size = 90.0f;
+        color = sf::Color::Green;
+        speed = 2.0f;
         break;
     default:
-        this->enemy.setSize(sf::Vector2f(100.0f, 100.0f));
-        this->enemy.setFillColor(sf::Color::Yellow);
+        size = 100.0f;
+        color = sf::Color::Yellow;
+        speed = 1.8f;
         break;
     }
 
-    /* Spawn the enemy */
-    this->enemies.emplace_back(enemy);
+    this->enemies.emplace_back(x, y, size, color, speed);
 }
-
 
 void Game::handleEnemyClick()
 {
-    // We use an iterator to go through the enemies in the list
     auto it = this->enemies.begin();
-    while (it != this->enemies.end())  // Loop through the list of enemies
+    while (it != this->enemies.end())
     {
-        const sf::FloatRect bounds = it->getGlobalBounds();  // Get the boundaries of the enemy
-        if (bounds.contains(this->mouseViewPosition))  // Check if the enemy was clicked
+        if (it->getBounds().contains(this->mouseViewPosition))
         {
-            if (it->getFillColor() == sf::Color::Magenta)  // If the enemy is Magenta
-            {
-                this->points += 10;  // Add 10 points to the score
-            }else if (it->getFillColor() == sf::Color::Blue)  // If the enemy is Magenta
-            {
-                this->points += 7;  // Add 10 points to the score
-            }else if (it->getFillColor() == sf::Color::Cyan)  // If the enemy is Magenta
-            {
-                this->points += 5;  // Add 10 points to the score
-            }else if (it->getFillColor() == sf::Color::Red)  // If the enemy is Magenta
-            {
-                this->points += 3;  // Add 10 points to the score
-            }else if (it->getFillColor() == sf::Color::Green)  // If the enemy is Magenta
-            {
-                this->points += 2;  // Add 10 points to the score
-            }
-            else if (it->getFillColor() == sf::Color::Yellow)  // If the enemy is Magenta
-            {
-                this->points += 1;  // Add 10 points to the score
-            }
+            if (it->getColor() == sf::Color::Magenta) this->points += 10;
+            else if (it->getColor() == sf::Color::Blue) this->points += 7;
+            else if (it->getColor() == sf::Color::Cyan) this->points += 5;
+            else if (it->getColor() == sf::Color::Red) this->points += 3;
+            else if (it->getColor() == sf::Color::Green) this->points += 2;
+            else if (it->getColor() == sf::Color::Yellow) this->points += 1;
 
-            it = this->enemies.erase(it);  // Remove the clicked enemy from the list
+            it = this->enemies.erase(it);
         }
         else
         {
-            ++it;  // Move to the next enemy in the list
+            ++it;
         }
     }
 }
 
 void Game::updateEnemies()
 {
-    /*
-        @return void
-
-        Update the enemy spawn timer and spawn enemies
-        when the total amount  of enemies is smaller than
-        the maximum number of enemies
-        - Remove the enemies at the edge of the screen
-    */
-
-    //Updating the timer for enemy spawning
-    if (this->enemies.size() < this->maxEnemies) {
-        if (this->enemySpawnTimer >= enemySpawnTimerMax) {
-
-            //Spawn the enemy and reset the timer
+    if (this->enemies.size() < this->maxEnemies)
+    {
+        if (this->enemySpawnTimer >= this->enemySpawnTimerMax)
+        {
             this->spawnEnemy();
             this->enemySpawnTimer = 0.0f;
         }
-        else {
+        else
+        {
             this->enemySpawnTimer += 1.0f;
         }
     }
 
-    /* Move the enemies */
-    for (int i = 0; i < this->enemies.size(); i++)
+    for (int i = enemies.size() - 1; i >= 0; i--)
     {
-        this->enemies[i].move(sf::Vector2f(0.0f, 2.0f));
+        enemies[i].update();
 
-        if (this->enemies[i].getPosition().y > this->window->getSize().y)
+        // Calculate when the entire shape is off screen
+        if (enemies[i].getBounds().position.y > this->window->getSize().y)
         {
-            this->enemies.erase(this->enemies.begin() + i);
-            this->health -= 1;
-            i--; // Decrement i to account for the shift
+            enemies.erase(enemies.begin() + i);
+            health -= 1;
         }
-    }
 
+    }
 }
 
 void Game::updateText()
@@ -258,12 +220,12 @@ void Game::renderText(sf::RenderTarget& target)
 
 void Game::renderEnemies(sf::RenderTarget& target)
 {
-    /* Render all the enemies */
-    for (auto& e : this->enemies)
+    for (auto& enemy : this->enemies)
     {
-        target.draw(e);
+        enemy.render(target);
     }
 }
+
 
 void Game::render()
 {
